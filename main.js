@@ -20,10 +20,30 @@ var todoStorage = {
 const app = new Vue({
     // アプリケーションで使用したいデータは data
     el: '#app',
-    data: {
+
     // 使用するデータ
+    data: {
     todos: []
     },
+    
+    // watch オプションの「ウォッチャ」機能を使う
+    watch: {
+        // オプションを使う場合はオブジェクト形式
+        todos: {
+          // 引数はウォッチしているプロパティの変更後の値
+          handler: function (todos) {
+            todoStorage.save(todos)
+          },
+          // deep オプションでネストしているデータも監視できる
+          deep: true
+        }
+    },
+    // 特定のタイミングに何か処理をはさみたいときは「ライフサイクルフック」のメソッドを使用
+    created() {
+        // インスタンス作成時に自動的に fetch() する
+        this.todos = todoStorage.fetch()
+    },
+
     // 使用するメソッド
     methods: {
     // ToDo 追加の処理
