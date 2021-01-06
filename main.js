@@ -23,7 +23,15 @@ const app = new Vue({
 
     // 使用するデータ
     data: {
-    todos: []
+    todos: [],
+    options: [
+        { value: -1, label: 'すべて' },
+        { value: 0,  label: '作業中' },
+        { value: 1,  label: '完了' }
+      ],
+      // 選択している options の value を記憶するためのデータ
+      // 初期値を「-1」つまり「すべて」にする
+      current: -1
     },
     
     // watch オプションの「ウォッチャ」機能を使う
@@ -46,24 +54,53 @@ const app = new Vue({
 
     // 使用するメソッド
     methods: {
-    // ToDo 追加の処理
-    doAdd: function(event, value) {
-        // ref で名前を付けておいた要素を参照
-        var comment = this.$refs.comment
-        if (!comment.value.length) {
-          return
+        // ToDo 追加の処理
+        doAdd: function(event, value) {
+            // ref で名前を付けておいた要素を参照
+            var comment = this.$refs.comment
+            if (!comment.value.length) {
+            return
+            }
+            // { 新しいID, コメント, 作業状態 }
+            // というオブジェクトを現在の todos リストへ push
+            // 作業状態「state」はデフォルト「作業中=0」で作成
+            this.todos.push({
+            id: todoStorage.uid++,
+            comment: comment.value,
+            state: 0
+            })
+            // フォーム要素を空にする
+            comment.value = ''
+        },
+        
+        // 状態変更の処理
+        doChangeState: function(item) {
+            item.state = item.state ? 0 : 1
+        },
+        // 削除の処理
+        doRemove: function(item) {
+            var index = this.todos.indexOf(item)
+            this.todos.splice(index, 1)
         }
-        // { 新しいID, コメント, 作業状態 }
-        // というオブジェクトを現在の todos リストへ push
-        // 作業状態「state」はデフォルト「作業中=0」で作成
-        this.todos.push({
-          id: todoStorage.uid++,
-          comment: comment.value,
-          state: 0
-        })
-        // フォーム要素を空にする
-        comment.value = ''
-      }
+    },
+
+    // 元になったデータに変更があるまで、結果をキャッシュする
+    computed: {
+        computedTodos: function() {
+          // データ current が -1 ならすべて
+          // それ以外なら current と state が一致するものだけに絞り込む
+          return this.todos.filter(function(el) {
+            return this.current < 0 ? true : this.current === el.state
+          }, this)
+        },
+
+        labels() {
+            return this.options.reduce(function (a, b) {
+              return Object.assign(a, { [b.value]: b.label })
+            }, {})
+            // キーから見つけやすいように、次のように加工したデータを作成
+            // {0: '作業中', 1: '完了', -1: 'すべて'}
+        }
     }
 })
 
