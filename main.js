@@ -21,9 +21,29 @@ const app = new Vue({
     // アプリケーションで使用したいデータは data
     el: '#app',
     data: {
-      // 使用するデータ
+    // 使用するデータ
+    todos: []
     },
+    // 使用するメソッド
     methods: {
-      // 使用するメソッド
+    // ToDo 追加の処理
+    doAdd: function(event, value) {
+        // ref で名前を付けておいた要素を参照
+        var comment = this.$refs.comment
+        if (!comment.value.length) {
+          return
+        }
+        // { 新しいID, コメント, 作業状態 }
+        // というオブジェクトを現在の todos リストへ push
+        // 作業状態「state」はデフォルト「作業中=0」で作成
+        this.todos.push({
+          id: todoStorage.uid++,
+          comment: comment.value,
+          state: 0
+        })
+        // フォーム要素を空にする
+        comment.value = ''
+      }
     }
-  })
+})
+
